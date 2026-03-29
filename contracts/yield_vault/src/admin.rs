@@ -2,6 +2,8 @@ use crate::{DataKey, VaultError, YieldVault};
 use soroban_sdk::{symbol_short, Address, Env};
 
 impl YieldVault {
+    /// Immediately pause all vault operations (deposit, withdraw, rebalance).
+    /// Callable only by admin.
     pub fn emergency_pause(env: Env, admin: Address) -> Result<(), VaultError> {
         Self::require_admin(&env, &admin)?;
         env.storage().instance().set(&DataKey::Paused, &true);
@@ -9,6 +11,8 @@ impl YieldVault {
         Ok(())
     }
 
+    /// Resume vault operations after an emergency pause.
+    /// Callable only by admin.
     pub fn emergency_unpause(env: Env, admin: Address) -> Result<(), VaultError> {
         Self::require_admin(&env, &admin)?;
         env.storage().instance().remove(&DataKey::Paused);
@@ -69,6 +73,11 @@ impl YieldVault {
         Ok(())
     }
 
+    /// Initiate or finalize a change of the admin address with a 24-hour timelock.
+    ///
+    /// To change admin:
+    /// 1. Call `set_admin` with the `new_admin` address. This starts the 24h timelock.
+    /// 2. After 24h, call `set_admin` again with the same `new_admin` address to finalize.
     pub fn set_admin(env: Env, admin: Address, new_admin: Address) -> Result<(), VaultError> {
         Self::require_admin(&env, &admin)?;
 
@@ -99,6 +108,7 @@ impl YieldVault {
         Err(VaultError::TimelockActive)
     }
 
+    /// View function to check if the vault is currently paused.
     pub fn is_paused(env: &Env) -> bool {
         env.storage()
             .instance()

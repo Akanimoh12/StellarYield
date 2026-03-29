@@ -119,6 +119,11 @@ impl YieldVault {
 
     /// Set the min/max fee bounds. Admin-only.
     /// Min must be >= 100 bps (1%), max must be <= 1000 bps (10%).
+    ///
+    /// # Arguments
+    /// * `admin` - Current admin address.
+    /// * `min_bps` - Minimum fee in basis points.
+    /// * `max_bps` - Maximum fee in basis points.
     pub fn set_fee_bounds(
         env: Env,
         admin: Address,
@@ -140,7 +145,10 @@ impl YieldVault {
     }
 
     /// Apply the performance fee to a harvest yield amount.
-    /// Returns (net_amount, fee_amount).
+    /// Returns a tuple of (net_amount, fee_amount).
+    ///
+    /// # Arguments
+    /// * `gross_amount` - The total yield amount before fees.
     pub fn apply_performance_fee(env: &Env, gross_amount: i128) -> (i128, i128) {
         if gross_amount <= 0 {
             return (0, 0);
@@ -159,6 +167,7 @@ impl YieldVault {
     }
 
     /// View: return the current performance fee in basis points.
+    /// This fee is applied to harvest yields.
     pub fn get_performance_fee_bps(env: Env) -> i128 {
         env.storage()
             .instance()
@@ -166,7 +175,7 @@ impl YieldVault {
             .unwrap_or(DEFAULT_MIN_FEE_BPS)
     }
 
-    /// View: return the APY history snapshots.
+    /// View: return the APY history snapshots for performance fee calculation.
     pub fn get_apy_history(env: Env) -> Vec<ApySnapshot> {
         env.storage()
             .instance()
@@ -174,7 +183,7 @@ impl YieldVault {
             .unwrap_or(Vec::new(&env))
     }
 
-    /// View: return total fees collected.
+    /// View: return the cumulative total of performance fees collected.
     pub fn get_total_fees_collected(env: Env) -> i128 {
         env.storage()
             .instance()
