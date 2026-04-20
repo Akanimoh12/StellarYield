@@ -9,7 +9,10 @@ mod verification {
     #[kani::unwind(11)]
     fn prove_fee_bounds() {
         let env = Env::default();
-        let admin = Address::generate(&env);
+        let admin = Address::from_str(
+            &env,
+            "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF",
+        );
         let apy: i128 = kani::any();
 
         // Assume sensible APY range to avoid extreme overflow logic unrelated to the fee bounds
